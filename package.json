@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/yan-foto/generator-neutron",
   "dependencies": {
+    "mkdirp": "^0.5.1",
     "yeoman-generator": "^0.20.2"
   }
 }
