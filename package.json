@@ -1,0 +1,26 @@
+{
+  "name": "generator-neutron",
+  "version": "0.1.0",
+  "description": "Convenient Yeoman generator for neutron",
+  "files": [
+    "app"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yan-foto/generator-neutron.git"
+  },
+  "keywords": [
+    "yeoman-generator",
+    "neutron",
+    "electron"
+  ],
+  "author": "Yan Foto",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yan-foto/generator-neutron/issues"
+  },
+  "homepage": "https://github.com/yan-foto/generator-neutron",
+  "dependencies": {
+    "yeoman-generator": "^0.20.2"
+  }
+}
