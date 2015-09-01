@@ -6,10 +6,14 @@ var extend = require('util')._extend;
 var path = require('path');
 var fs = require('fs');
 var mkdir = require('mkdirp');
+var Q = require('q');
 
 module.exports = generators.Base.extend({
   constructor: function() {
     generators.Base.apply(this, arguments);
+
+    // Just in case .neutronrc is updated
+    this.conflicter.force = true;
 
     this.pkg = {
       version: '0.1.0',
@@ -31,14 +35,18 @@ module.exports = generators.Base.extend({
   },
   _clone: function(answers) {
     this.log('Trying to clone neutron repository...');
+    var deferred = Q.defer();
+
     exec('git clone https://github.com/yan-foto/neutron.git .', function(err, stdout) {
       if(err) {
         this.log.error('Cloning failed! (' + err.message.trim() + ')');
         return;
       }
 
-      this._prepareStructure();
+      deferred.resolve();
     }.bind(this));
+
+    return deferred.promise;
   },
   _prepareStructure: function() {
     this.log('Creating package structure...');
@@ -48,6 +56,19 @@ module.exports = generators.Base.extend({
 
     var pkg = path.join(process.cwd(), 'dist', 'package.json')
     fs.writeFileSync(pkg, JSON.stringify(this.pkg, null, 2));
+  },
+  _selectModules: function(answers) {
+    var config = this.fs.readJSON('.neutronrc');
+
+    var desired = Object.keys(config.dependencies).filter(function(module) {
+      return answers.modules.indexOf(module) == -1;
+    });
+
+    desired.forEach(function(module) {
+      delete config.dependencies[module];
+    });
+
+    this.fs.writeJSON('.neutronrc', config);
   },
   prompting: function() {
     var self = this;
@@ -67,6 +88,24 @@ module.exports = generators.Base.extend({
       name: 'description',
       message: 'Description',
       default: this.pkg.description
+    }, {
+      type: 'checkbox',
+      name: 'modules',
+      message: 'Desired modules',
+      choices: [
+        {
+          name: 'babel',
+          checked: true
+        },
+        {
+          name: 'jade',
+          checked: true
+        },
+        {
+          name: 'sass',
+          checked: true
+        }
+      ]
     }], function(answers) {
       self._checkGit(function(err) {
         if(err) {
@@ -75,7 +114,11 @@ module.exports = generators.Base.extend({
         }
 
         self.pkg = extend(self.pkg, answers);
-        self._clone(answers);
+        Q.fcall(self._clone.bind(self, answers))
+          .then(function() {
+            self._prepareStructure();
+            self._selectModules(answers);
+          });
       });
     });
   }
