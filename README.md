@@ -15,7 +15,7 @@ There is a single no-parameter generator, that clones the neutron's project into
 yo neutron
 ```
 
-![yo-neutron](https://cloud.githubusercontent.com/assets/1678441/9293185/912f51ac-4420-11e5-8417-4c030a6f13d3.png)
+![yo-neutron](https://raw.githubusercontent.com/yan-foto/yan-foto.github.io/master/assets/generator-neutron.gif)
 
 Apart from cloning the neutron repository, two directories, `src` and `dist`, are created . Neutron [expects](https://github.com/yan-foto/neutron#file-structure) source files to be in the former, and the transpiled/compiled/etc. files are stored in the latter directory.
 
