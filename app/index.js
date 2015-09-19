@@ -34,12 +34,15 @@ module.exports = generators.Base.extend({
     }.bind(this));
   },
   _clone: function(answers) {
-    this.log('Trying to clone neutron repository...');
+    var log = this.log;
     var deferred = Q.defer();
+
+    log('Trying to clone neutron repository...');
 
     exec('git clone https://github.com/yan-foto/neutron.git .', function(err, stdout) {
       if(err) {
-        this.log.error('Cloning failed! (' + err.message.trim() + ')');
+        log('Cloning failed! (' + err.message.trim() + ')');
+        deferred.reject(err);
         return;
       }
 
@@ -47,6 +50,22 @@ module.exports = generators.Base.extend({
     }.bind(this));
 
     return deferred.promise;
+  },
+  _install: function() {
+    var log = this.log;
+    var deferred = Q.defer();
+
+    log('Installing modules, bootstraping neutron...');
+
+    exec('npm install && gulp bootstrap', function(err, stdout) {
+      if(err) {
+        log('Bootsraping failed (' + err.message.trim() + ')');
+        deferred.reject(err);
+        return;
+      }
+
+      deferred.resolve();
+    });
   },
   _prepareStructure: function() {
     this.log('Creating package structure...');
@@ -109,7 +128,7 @@ module.exports = generators.Base.extend({
     }], function(answers) {
       self._checkGit(function(err) {
         if(err) {
-          self.log.error(err);
+          self.log(err);
           done();
         }
 
@@ -118,6 +137,10 @@ module.exports = generators.Base.extend({
           .then(function() {
             self._prepareStructure();
             self._selectModules(answers);
+            return self._install();
+          })
+          .catch(function(err) {
+            self.log.error(err);
           });
       });
     });
